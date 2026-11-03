@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#0a0e1a;--panel:#141928;--panel2:#1b2137;--border:#253050;--text:#e8edf5;--muted:#8690a6;--brand:#5f8fff;--accent:#a855f7;--crit:#ff4466;--ser:#ffa441;--mod:#44dd99}
+:root{--bg:#0b0e12;--panel:#11161c;--panel2:#171e26;--border:#252d37;--text:#edf1f5;--muted:#8995a3;--brand:#86a9ff;--accent:#b1c5ff;--crit:#ff6577;--ser:#ffb65c;--mod:#55d6a0}
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{font-family:Inter,sans-serif;background:var(--bg);color:var(--text);line-height:1.55;overflow-x:hidden}
@@ -143,6 +143,36 @@ footer{border-top:1px solid var(--border);padding:3rem 0 2rem;background:var(--p
   nav .links{display:none}
   section.sec{padding:4rem 0}
 }
+
+/* NearMiss · Modern SaaS clean direction */
+:root{--shadow:0 16px 42px rgba(0,0,0,.22)}
+body{background:var(--bg);color:var(--text)}
+nav{background:rgba(11,14,18,.88);border-color:var(--border)}
+.logo-mark{background:#1d2a42;border:1px solid #2d4267;color:var(--brand);box-shadow:none}
+.btn{border-radius:8px;background:#151b22;border-color:var(--border);transition:transform .18s ease,border-color .18s ease,background .18s ease}
+.btn:hover{transform:translateY(-1px);border-color:#526580;color:var(--text)}
+.btn-primary{background:#dfe8ff;color:#10151b;border:1px solid #dfe8ff}.btn-primary:hover{background:#cbd9fb;color:#10151b}
+.hero{padding:4.2rem 0 2.6rem}.hero:before{background:radial-gradient(circle,rgba(134,169,255,.12),transparent 65%)}.hero:after{background:radial-gradient(circle,rgba(134,169,255,.06),transparent 65%)}
+.hero-pill{background:#151f2d;border-color:#2d3c53;color:#bfd0f1}.hero-pill-dot{background:var(--mod);box-shadow:0 0 9px rgba(85,214,160,.6)}
+.hero h1{background:linear-gradient(100deg,#f2f5f9 8%,#aebfe3 96%);-webkit-background-clip:text}
+.hero-img-wrap{border-radius:14px;box-shadow:var(--shadow);border-color:#303946}.hero-badge{border-radius:8px;background:rgba(11,14,18,.92)}
+.strip{background:#0e1217;border-color:var(--border)}.strip-v{font-variant-numeric:tabular-nums}.strip-l{font-size:.68rem;letter-spacing:.65px}
+.sec-tag{color:var(--brand)}.sec h2{letter-spacing:-1.25px}
+.prob-card,.how-step,.pilot-stat,.tech-card,.aud{background:var(--panel);border-color:var(--border);border-radius:12px;transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease}
+.prob-card:hover,.how-step:hover,.pilot-stat:hover,.tech-card:hover,.aud:hover{transform:translateY(-3px);border-color:#3b4653;box-shadow:var(--shadow)}
+.prob-card.bad{border-color:rgba(255,101,119,.24)}.prob-card.good{border-color:rgba(85,214,160,.24)}
+.how-step:before{height:2px;background:linear-gradient(90deg,var(--brand),#455c84)}
+.pilot-bg{background:linear-gradient(180deg,transparent,rgba(134,169,255,.025) 50%,transparent)}
+.pilot-stat:before{box-shadow:none!important;width:2px}.pilot-copy .quote{background:#151d27;border-left-color:var(--brand);border-radius:0 7px 7px 0}
+.tech-card .meta{background:#182131;color:#b7c9ef;border-radius:5px}
+.cta-box{background:linear-gradient(125deg,#151d29,#141b26 72%,#192237);border-color:#303946;border-radius:16px}.cta-box:before,.cta-box:after{background:radial-gradient(circle,rgba(134,169,255,.1),transparent 70%)}
+.cta-box h2{background:linear-gradient(100deg,#f2f5f9,#b7c9ef);-webkit-background-clip:text}.cta-box p{color:#adb9c8}
+footer{background:#0e1217;border-color:var(--border)}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.hero-grid>div:first-child{animation:rise .55s ease both}.hero-img-wrap{animation:rise .65s .08s ease both}
+@media(max-width:900px){.hero{padding:3.1rem 0 2rem}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
+
 </style>
 </head>
 <body>
@@ -183,7 +213,7 @@ footer{border-top:1px solid var(--border);padding:3rem 0 2rem;background:var(--p
 
 <div class="strip">
   <div class="wrap strip-grid">
-    <div><div class="strip-v c">22</div><div class="strip-l">Critical near-misses detected</div></div>
+    <div><div class="strip-v c">22</div><div class="strip-l">⚠ Critical near-misses detected</div></div>
     <div><div class="strip-v b">57 min</div><div class="strip-l">Of real drone footage analysed</div></div>
     <div><div class="strip-v g">100%</div><div class="strip-l">Recall on contact events</div></div>
     <div><div class="strip-v a">440</div><div class="strip-l">Pedestrian tracks reviewed</div></div>
@@ -258,7 +288,7 @@ footer{border-top:1px solid var(--border);padding:3rem 0 2rem;background:var(--p
     <div class="pilot-grid">
       <div class="pilot-stats">
         <div class="pilot-stat a"><div class="v">45</div><div class="l">Near-miss events</div><div class="s">PET ≤ 2.0 s</div></div>
-        <div class="pilot-stat b"><div class="v">22</div><div class="l">Critical</div><div class="s">PET ≤ 1.0 s</div></div>
+        <div class="pilot-stat b"><div class="v">22</div><div class="l">⚠ Critical</div><div class="s">PET ≤ 1.0 s</div></div>
         <div class="pilot-stat c"><div class="v">100%</div><div class="l">Contact recall</div><div class="s">vs FLUID ground truth</div></div>
         <div class="pilot-stat d"><div class="v">0.35s</div><div class="l">Median PET</div><div class="s">Hotspot session</div></div>
       </div>

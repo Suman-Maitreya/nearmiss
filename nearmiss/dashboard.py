@@ -8,83 +8,51 @@ import streamlit as st
 import plotly.express as px
 import plotly.graph_objects as go
 
-DB = r"D:\META\nearmiss\nearmiss.db"
+DB = os.environ.get("NEARMISS_DB", str(pathlib.Path(__file__).resolve().parent.parent / "nearmiss.db"))
 st.set_page_config(page_title="NearMiss · Jurong Lake Pilot", page_icon="⚠️", layout="wide", initial_sidebar_state="expanded")
 
 CSS = """
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap');
-:root{--bg:#0a0e1a;--panel:#141928;--panel-2:#1b2137;--border:#253050;--text:#e8edf5;--muted:#8690a6;--brand:#5f8fff;--accent:#a855f7;--crit:#ff4466;--ser:#ffa441;--mod:#44dd99}
-html,body,[class*="css"]{font-family:'Inter',sans-serif !important}
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+:root{--bg:#0b0e12;--panel:#11161c;--panel-2:#171e26;--border:#252d37;--text:#edf1f5;--muted:#8995a3;--brand:#86a9ff;--accent:#b1c5ff;--crit:#ff6577;--ser:#ffb65c;--mod:#55d6a0;--shadow:0 12px 30px rgba(0,0,0,.18)}
+html,body,[class*="css"]{font-family:'Inter',sans-serif !important;color:var(--text)}
 .stApp{background:var(--bg);color:var(--text)}
-.block-container{padding-top:1rem;max-width:1400px}
-section[data-testid="stSidebar"]{background:#0d1222;border-right:1px solid var(--border)}
+.block-container{padding:1.1rem 2rem 2rem;max-width:1500px}
+section[data-testid="stSidebar"]{background:#0e1217;border-right:1px solid var(--border)}
 section[data-testid="stSidebar"] *{color:var(--text) !important}
-
-/* top site bar */
-.topbar{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.4rem;background:linear-gradient(90deg,rgba(95,143,255,.08),rgba(168,85,247,.06));border:1px solid var(--border);border-radius:14px;margin-bottom:1.6rem}
-.tb-left{display:flex;align-items:center;gap:1rem}
-.tb-logo{width:38px;height:38px;background:linear-gradient(135deg,#5f8fff,#a855f7);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;box-shadow:0 4px 20px rgba(95,143,255,.3)}
-.tb-brand{font-weight:800;font-size:1.1rem;letter-spacing:-.3px}
-.tb-site{color:var(--muted);font-size:.82rem;margin-top:.1rem}
-.tb-site .green-dot{display:inline-block;width:7px;height:7px;background:var(--mod);border-radius:50%;box-shadow:0 0 10px var(--mod);margin-right:.4rem;vertical-align:middle;animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
-.tb-right{display:flex;gap:.6rem;align-items:center}
-.tb-chip{background:var(--panel);border:1px solid var(--border);padding:.35rem .8rem;border-radius:999px;font-size:.78rem;color:var(--muted);font-family:'JetBrains Mono',monospace}
-
-/* hero */
-.hero{background:linear-gradient(135deg,#1a2048 0%,#3b1f66 60%,#2b1b4a 100%);padding:2rem 2.2rem;border-radius:18px;margin-bottom:1.8rem;border:1px solid var(--border);box-shadow:0 8px 40px rgba(95,143,255,.08);position:relative;overflow:hidden}
-.hero::before{content:'';position:absolute;top:-80px;right:-80px;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(168,85,247,.3),transparent 70%)}
-.hero-title{font-size:2.5rem;font-weight:800;line-height:1.1;margin:0;background:linear-gradient(90deg,#e8edf5,#a8c0ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.hero-sub{color:var(--muted);margin-top:.35rem;font-size:1rem}
-.hero-pill{display:inline-block;margin-top:1rem;padding:.3rem .8rem;background:rgba(95,143,255,.12);border:1px solid rgba(95,143,255,.35);border-radius:999px;font-size:.78rem;color:#a8c0ff;letter-spacing:.4px;text-transform:uppercase}
-
-/* KPI */
-.kpi{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:1.1rem 1.3rem;position:relative;overflow:hidden;height:100%}
-.kpi::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px}
-.kpi.k-blue::before{background:var(--brand);box-shadow:0 0 20px var(--brand)}
-.kpi.k-crit::before{background:var(--crit);box-shadow:0 0 20px var(--crit)}
-.kpi.k-amber::before{background:var(--ser);box-shadow:0 0 20px var(--ser)}
-.kpi.k-green::before{background:var(--mod);box-shadow:0 0 20px var(--mod)}
-.kpi-label{color:var(--muted);font-size:.78rem;letter-spacing:.6px;text-transform:uppercase;font-weight:500;margin-bottom:.3rem}
-.kpi-value{font-size:2.4rem;font-weight:700;line-height:1}
-.kpi-value.v-crit{color:var(--crit)}.kpi-value.v-amber{color:var(--ser)}.kpi-value.v-green{color:var(--mod)}.kpi-value.v-blue{color:var(--brand)}
-.kpi-sub{color:var(--muted);font-size:.78rem;margin-top:.35rem}
-
-.sec-h{font-size:1.1rem;font-weight:600;letter-spacing:.3px;margin:1.8rem 0 .8rem 0;color:var(--text);padding-bottom:.4rem;border-bottom:1px solid var(--border)}
-
-.scard{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:1.2rem 1.4rem;margin-bottom:1rem}
-.scard-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:.9rem}
-.scard-name{font-weight:600;font-size:1rem;color:var(--text)}
-.scard-name .scene-id{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--muted);font-weight:400;margin-left:.6rem}
-.scard-chip{background:rgba(95,143,255,.1);border:1px solid rgba(95,143,255,.3);color:var(--brand);padding:.25rem .7rem;border-radius:999px;font-size:.72rem;font-weight:500;letter-spacing:.4px}
-.scard-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}
-.scard-stat .k-l{color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.2rem}
-.scard-stat .k-v{font-size:1.4rem;font-weight:600}
-.scard-stat .k-v.crit{color:var(--crit)}.scard-stat .k-v.ser{color:var(--ser)}.scard-stat .k-v.mod{color:var(--mod)}
-
-.sev-chip{display:inline-block;padding:.18rem .55rem;border-radius:999px;font-size:.72rem;font-weight:500;letter-spacing:.3px}
-.sev-crit{background:rgba(255,68,102,.15);color:var(--crit);border:1px solid rgba(255,68,102,.4)}
-.sev-ser{background:rgba(255,164,65,.15);color:var(--ser);border:1px solid rgba(255,164,65,.4)}
-.sev-mod{background:rgba(68,221,153,.15);color:var(--mod);border:1px solid rgba(68,221,153,.4)}
-
-.detail-panel{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:1.4rem 1.6rem}
-.detail-row{margin-bottom:.7rem}
-.detail-label{color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:.5px;margin-bottom:.15rem}
-.detail-value{color:var(--text);font-size:1rem}
-.detail-value code{background:var(--panel-2);color:#a8c0ff;padding:.1rem .4rem;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:.85rem}
-.obs{background:var(--panel-2);border-left:3px solid var(--brand);padding:.8rem 1rem;border-radius:6px;font-style:italic;color:var(--text);margin-top:.5rem}
-
-[data-testid="stDataFrame"]{background:var(--panel) !important;border-radius:10px;border:1px solid var(--border) !important}
-
-.stButton>button{border-radius:10px;font-weight:500;padding:.55rem 1rem;border:1px solid var(--border);background:var(--panel-2);color:var(--text);transition:all .15s}
-.stButton>button:hover{background:var(--panel);border-color:var(--brand);color:var(--brand)}
-
-.page-title{font-size:1.9rem;font-weight:700;margin:.5rem 0 .3rem 0}
-.page-sub{color:var(--muted);margin-bottom:1.5rem}
-
-.report-stub{padding:3rem;text-align:center;background:var(--panel);border:1px dashed var(--border);border-radius:14px}
-.report-stub .big{font-size:2.5rem;margin-bottom:.6rem}
+section[data-testid="stSidebar"] [data-testid="stRadio"] label{border-radius:9px;padding:.28rem .45rem;transition:background .18s ease}
+section[data-testid="stSidebar"] [data-testid="stRadio"] label:hover{background:#171e26}
+/* Product bar */
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:.78rem 1rem;background:rgba(17,22,28,.92);border:1px solid var(--border);border-radius:12px;margin-bottom:1.2rem;box-shadow:var(--shadow);animation:rise .45s ease both}
+.tb-left{display:flex;align-items:center;gap:.8rem}.tb-logo{width:34px;height:34px;background:#1d2a42;border:1px solid #2d4267;border-radius:9px;display:flex;align-items:center;justify-content:center;color:var(--brand);font-size:1rem}
+.tb-brand{font-weight:700;font-size:1rem;letter-spacing:-.35px}.tb-site{color:var(--muted);font-size:.76rem;margin-top:.08rem}.tb-site .green-dot{display:inline-block;width:7px;height:7px;background:var(--mod);border-radius:50%;margin-right:.4rem;vertical-align:middle;animation:pulse 2s infinite}
+.tb-right{display:flex;gap:.45rem;align-items:center}.tb-chip{background:#151b22;border:1px solid var(--border);padding:.28rem .65rem;border-radius:7px;font-size:.7rem;color:#aab5c2;font-family:'JetBrains Mono',monospace}
+@keyframes pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(85,214,160,.28)}50%{opacity:.72;box-shadow:0 0 0 4px rgba(85,214,160,0)}}
+@keyframes rise{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+/* Overview */
+.hero{background:linear-gradient(110deg,#151d29,#121923 62%,#182033);padding:1.35rem 1.6rem;border-radius:14px;margin-bottom:1rem;border:1px solid var(--border);position:relative;overflow:hidden;animation:rise .5s .05s ease both}
+.hero:after{content:"";position:absolute;right:-90px;top:-150px;width:340px;height:340px;border-radius:50%;background:radial-gradient(circle,rgba(134,169,255,.13),transparent 67%);pointer-events:none}
+.hero-title{font-size:1.85rem;font-weight:700;line-height:1.15;letter-spacing:-.8px;margin:0;color:#f2f5f9}
+.hero-sub{color:#a4afbc;margin-top:.35rem;font-size:.88rem}.hero-pill{display:inline-flex;margin-top:.75rem;padding:.25rem .58rem;background:#182131;border:1px solid #2b3b55;border-radius:6px;font-size:.68rem;color:#b7c9ef;letter-spacing:.15px}
+/* Metric cards */
+.kpi{background:var(--panel);border:1px solid var(--border);border-radius:11px;padding:.9rem 1rem;position:relative;overflow:hidden;height:100%;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;animation:rise .45s ease both}
+.kpi:hover,.scard:hover,.detail-panel:hover{transform:translateY(-2px);border-color:#3a4655;box-shadow:var(--shadow)}
+.kpi:before{content:'';position:absolute;left:0;top:10px;bottom:10px;width:2px;border-radius:2px}.kpi.k-blue:before{background:var(--brand)}.kpi.k-crit:before{background:var(--crit)}.kpi.k-amber:before{background:var(--ser)}.kpi.k-green:before{background:var(--mod)}
+.kpi-label{color:var(--muted);font-size:.69rem;letter-spacing:.55px;text-transform:uppercase;font-weight:600;margin-bottom:.35rem}.kpi-value{font-size:2rem;font-weight:700;line-height:1;letter-spacing:-1px;font-variant-numeric:tabular-nums}
+.kpi-value.v-crit{color:var(--crit)}.kpi-value.v-amber{color:var(--ser)}.kpi-value.v-green{color:var(--mod)}.kpi-value.v-blue{color:var(--brand)}.kpi-sub{color:var(--muted);font-size:.72rem;margin-top:.35rem}
+.sec-h{font-size:.9rem;font-weight:600;letter-spacing:-.1px;margin:1.25rem 0 .65rem;color:var(--text);padding-bottom:.5rem;border-bottom:1px solid var(--border)}
+.scard{background:var(--panel);border:1px solid var(--border);border-radius:11px;padding:1rem 1.1rem;margin-bottom:.75rem;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}.scard-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem}.scard-name{font-weight:600;font-size:.9rem;color:var(--text)}.scard-name .scene-id{font-family:'JetBrains Mono',monospace;font-size:.67rem;color:var(--muted);font-weight:400;margin-left:.55rem}.scard-chip{background:#171f2a;border:1px solid var(--border);color:#b7c9ef;padding:.2rem .55rem;border-radius:6px;font-size:.68rem;font-weight:500}
+.scard-row{display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem}.scard-stat .k-l{color:var(--muted);font-size:.64rem;text-transform:uppercase;letter-spacing:.45px;margin-bottom:.17rem}.scard-stat .k-v{font-size:1.15rem;font-weight:600;font-variant-numeric:tabular-nums}.scard-stat .k-v.crit{color:var(--crit)}.scard-stat .k-v.ser{color:var(--ser)}.scard-stat .k-v.mod{color:var(--mod)}
+.sev-chip{display:inline-block;padding:.17rem .48rem;border-radius:6px;font-size:.68rem;font-weight:600;letter-spacing:.2px}.sev-crit{background:rgba(255,101,119,.1);color:var(--crit);border:1px solid rgba(255,101,119,.26)}.sev-ser{background:rgba(255,182,92,.1);color:var(--ser);border:1px solid rgba(255,182,92,.25)}.sev-mod{background:rgba(85,214,160,.1);color:var(--mod);border:1px solid rgba(85,214,160,.25)}
+.detail-panel{background:var(--panel);border:1px solid var(--border);border-radius:11px;padding:1.1rem 1.25rem;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}.detail-row{margin-bottom:.65rem}.detail-label{color:var(--muted);font-size:.66rem;text-transform:uppercase;letter-spacing:.55px;margin-bottom:.15rem}.detail-value{color:var(--text);font-size:.9rem}.detail-value code{background:#1a222c;color:#b7c9ef;padding:.1rem .35rem;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:.8rem}.obs{background:#151d27;border-left:2px solid var(--brand);padding:.7rem .85rem;border-radius:0 7px 7px 0;font-style:normal;color:#c5ced9;margin-top:.45rem;font-size:.84rem}
+[data-testid="stDataFrame"]{background:var(--panel) !important;border-radius:9px;border:1px solid var(--border) !important}
+.stButton>button,.stDownloadButton>button{border-radius:8px;font-weight:600;padding:.48rem .8rem;border:1px solid var(--border);background:#171e26;color:var(--text);transition:all .16s ease}.stButton>button:hover,.stDownloadButton>button:hover{background:#202a36;border-color:#546a8d;color:#dce7ff;transform:translateY(-1px)}button[kind="primary"]{background:#dfe8ff!important;color:#10151b!important;border:1px solid #dfe8ff!important}.stTextArea textarea,.stSelectbox div[data-baseweb="select"],.stMultiSelect div[data-baseweb="select"]{background:#11161c!important;border-color:var(--border)!important;border-radius:8px!important}
+.page-title{font-size:1.65rem;font-weight:700;letter-spacing:-.65px;margin:.35rem 0 .18rem}.page-sub{color:var(--muted);font-size:.86rem;margin-bottom:1.1rem}
+.report-stub{padding:2.5rem;text-align:center;background:var(--panel);border:1px dashed var(--border);border-radius:12px}.report-stub .big{font-size:2.2rem;margin-bottom:.5rem}
+[data-testid="stPlotlyChart"]{background:var(--panel);border:1px solid var(--border);border-radius:11px;padding:.35rem .45rem;animation:rise .5s ease both}
+@media(max-width:900px){.block-container{padding:.8rem 1rem 1.5rem}.tb-chip{display:none}.scard-row{gap:.55rem}.hero-title{font-size:1.55rem}}
+@media(max-width:600px){.topbar{align-items:flex-start}.tb-site{max-width:220px}.scard-row{grid-template-columns:repeat(2,1fr)}.hero{padding:1.1rem}.kpi-value{font-size:1.7rem}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
 </style>
 """
 st.markdown(CSS, unsafe_allow_html=True)
@@ -118,14 +86,15 @@ def pretty_session(scene):
 
 def sev_chip(sev):
     cls = {'critical':'sev-crit','serious':'sev-ser','moderate':'sev-mod'}.get(sev,'sev-mod')
-    return f'<span class="sev-chip {cls}">{sev}</span>'
+    icon = {'critical': '⚠', 'serious': '⚡', 'moderate': '✓'}.get(sev, '•')
+    return f'<span class="sev-chip {cls}">{icon} &nbsp;{sev}</span>'
 
 def kpi_card(label, value, flavor='k-blue', val_cls='v-blue', subtitle=None):
     sub = f'<div class="kpi-sub">{subtitle}</div>' if subtitle else ''
     return f'<div class="kpi {flavor}"><div class="kpi-label">{label}</div><div class="kpi-value {val_cls}">{value}</div>{sub}</div>'
 
 def theme_plot(fig, height=320):
-    fig.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font=dict(color='#8690a6', family='Inter'), height=height, margin=dict(l=10,r=10,t=20,b=10), xaxis=dict(gridcolor='#1f2537', zerolinecolor='#1f2537'), yaxis=dict(gridcolor='#1f2537', zerolinecolor='#1f2537'))
+    fig.update_layout(plot_bgcolor='rgba(0,0,0,0)', paper_bgcolor='rgba(0,0,0,0)', font=dict(color='#8995a3', family='Inter', size=11), height=height, margin=dict(l=12,r=12,t=22,b=12), hoverlabel=dict(bgcolor='#171e26', bordercolor='#354150', font=dict(color='#edf1f5', family='Inter')), xaxis=dict(showgrid=False, zeroline=False, linecolor='#252d37', tickfont=dict(color='#aab5c2')), yaxis=dict(showgrid=False, zeroline=False, linecolor='#252d37', tickfont=dict(color='#aab5c2')))
     return fig
 
 # --- top bar (shown on every page) ---
@@ -151,11 +120,11 @@ st.markdown(site_badge_html, unsafe_allow_html=True)
 
 # --- sidebar nav ---
 st.sidebar.markdown("<div style='font-size:1.4rem;font-weight:700;padding:0 0 1rem 0;'>⚠️ NearMiss</div>", unsafe_allow_html=True)
-st.sidebar.markdown("<div style='color:#8690a6;font-size:.75rem;letter-spacing:.5px;text-transform:uppercase;'>Navigate</div>", unsafe_allow_html=True)
+st.sidebar.markdown("<div style='color:#8995a3;font-size:.75rem;letter-spacing:.5px;text-transform:uppercase;'>Navigate</div>", unsafe_allow_html=True)
 PAGE = st.sidebar.radio("", ["Overview", "Events", "Review Queue", "Coverage", "Reports"], label_visibility="collapsed")
 st.sidebar.markdown("---")
-st.sidebar.markdown(f"<div style='color:#8690a6;font-size:.72rem;'>Site</div><div style='font-family:JetBrains Mono,monospace;font-size:.8rem;color:#a8c0ff;'>FLUID Jurong Lake</div>", unsafe_allow_html=True)
-st.sidebar.markdown(f"<div style='color:#8690a6;font-size:.72rem;margin-top:1rem;'>DB</div><div style='font-family:JetBrains Mono,monospace;font-size:.72rem;color:#a8c0ff;word-break:break-all;'>{DB}</div>", unsafe_allow_html=True)
+st.sidebar.markdown(f"<div style='color:#8995a3;font-size:.72rem;'>Site</div><div style='font-family:JetBrains Mono,monospace;font-size:.8rem;color:#b1c5ff;'>FLUID Jurong Lake</div>", unsafe_allow_html=True)
+st.sidebar.markdown(f"<div style='color:#8995a3;font-size:.72rem;margin-top:1rem;'>DB</div><div style='font-family:JetBrains Mono,monospace;font-size:.72rem;color:#b1c5ff;word-break:break-all;'>{DB}</div>", unsafe_allow_html=True)
 
 # ===============================================================
 if PAGE == "Overview":
@@ -173,22 +142,26 @@ if PAGE == "Overview":
 
     c1,c2,c3,c4 = st.columns(4)
     c1.markdown(kpi_card("Total events", tot, 'k-blue', 'v-blue'), unsafe_allow_html=True)
-    c2.markdown(kpi_card("Critical (PET ≤ 1s)", crit, 'k-crit', 'v-crit'), unsafe_allow_html=True)
+    c2.markdown(kpi_card("⚠ Critical (PET ≤ 1s)", crit, 'k-crit', 'v-crit'), unsafe_allow_html=True)
     c3.markdown(kpi_card("Flagged for review", flagged, 'k-amber', 'v-amber', subtitle=f"{pending} pending human decision"), unsafe_allow_html=True)
     c4.markdown(kpi_card("Spark reviewed", reviewed, 'k-green', 'v-green'), unsafe_allow_html=True)
 
-    st.markdown("<div class='sec-h'>Severity distribution</div>", unsafe_allow_html=True)
-    sev = events['severity'].value_counts().reindex(['critical','serious','moderate']).fillna(0).astype(int)
-    fig = go.Figure()
-    colors = {'critical':'#ff4466','serious':'#ffa441','moderate':'#44dd99'}
-    for s in ['critical','serious','moderate']:
-        fig.add_trace(go.Bar(x=[s], y=[int(sev[s])], marker=dict(color=colors[s]), text=[int(sev[s])], textposition='outside', textfont=dict(size=18, color='#e8edf5'), name=s, showlegend=False))
-    st.plotly_chart(theme_plot(fig, 300), use_container_width=True)
+    chart_left, chart_right = st.columns([1, 1.45], gap="medium")
+    with chart_left:
+        st.markdown("<div class='sec-h'>⚠ Severity distribution</div>", unsafe_allow_html=True)
+        sev = events['severity'].value_counts().reindex(['critical','serious','moderate']).fillna(0).astype(int)
+        fig = go.Figure()
+        colors = {'critical':'#ff6577','serious':'#ffb65c','moderate':'#55d6a0'}
+        for s in ['critical','serious','moderate']:
+            label = {'critical':'⚠ Critical', 'serious':'⚡ Serious', 'moderate':'✓ Moderate'}[s]
+            fig.add_trace(go.Bar(x=[label], y=[int(sev[s])], marker=dict(color=colors[s], line=dict(width=0)), text=[int(sev[s])], textposition='outside', textfont=dict(size=15, color='#edf1f5'), name=label, hovertemplate=f'{label}: %{{y}} events<extra></extra>', showlegend=False))
+        st.plotly_chart(theme_plot(fig, 300), use_container_width=True)
 
-    st.markdown("<div class='sec-h'>PET distribution (time gap between pedestrian and vehicle)</div>", unsafe_allow_html=True)
-    fig2 = px.histogram(events, x='our_pet_s', nbins=20, color='severity', color_discrete_map={'critical':'#ff4466','serious':'#ffa441','moderate':'#44dd99'}, labels={'our_pet_s':'PET (seconds)'})
-    fig2.update_traces(opacity=0.9)
-    st.plotly_chart(theme_plot(fig2, 340), use_container_width=True)
+    with chart_right:
+        st.markdown("<div class='sec-h'>PET distribution · time gap (seconds)</div>", unsafe_allow_html=True)
+        fig2 = px.histogram(events, x='our_pet_s', nbins=20, color='severity', color_discrete_map={'critical':'#ff6577','serious':'#ffb65c','moderate':'#55d6a0'}, labels={'our_pet_s':'PET (seconds)'})
+        fig2.update_traces(opacity=0.88, marker_line_width=0, hovertemplate='PET: %{x:.2f}s<br>Events: %{y}<extra></extra>')
+        st.plotly_chart(theme_plot(fig2, 300), use_container_width=True)
 
     st.markdown("<div class='sec-h'>Per-session summary</div>", unsafe_allow_html=True)
     for _, r in coverage.iterrows():
@@ -196,7 +169,7 @@ if PAGE == "Overview":
         st.markdown(f"""<div class='scard'>
 <div class='scard-head'><span class='scard-name'>{pretty_session(r['scene'])}<span class='scene-id'>{r['scene']}</span></span><span class='scard-chip'>{dur_s}</span></div>
 <div class='scard-row'><div class='scard-stat'><div class='k-l'>Pedestrians</div><div class='k-v'>{int(r['ped_count']) if pd.notna(r['ped_count']) else 'n/a'}</div></div><div class='scard-stat'><div class='k-l'>Vehicles</div><div class='k-v'>{int(r['veh_count']) if pd.notna(r['veh_count']) else 'n/a'}</div></div><div class='scard-stat'><div class='k-l'>Candidate pairs</div><div class='k-v'>{int(r['candidate_pair_count']) if pd.notna(r['candidate_pair_count']) else 'n/a'}</div></div><div class='scard-stat'><div class='k-l'>Events</div><div class='k-v'>{int(r['event_count'])}</div></div></div>
-<div class='scard-row' style='margin-top:1rem;'><div class='scard-stat'><div class='k-l'>Critical</div><div class='k-v crit'>{int(r['critical_count'])}</div></div><div class='scard-stat'><div class='k-l'>Serious</div><div class='k-v ser'>{int(r['serious_count'])}</div></div><div class='scard-stat'><div class='k-l'>Moderate</div><div class='k-v mod'>{int(r['moderate_count'])}</div></div><div class='scard-stat'><div class='k-l'>Median PET</div><div class='k-v'>{r['median_pet_s']:.2f}s</div></div></div>
+<div class='scard-row' style='margin-top:1rem;'><div class='scard-stat'><div class='k-l'>⚠ Critical</div><div class='k-v crit'>{int(r['critical_count'])}</div></div><div class='scard-stat'><div class='k-l'>⚡ Serious</div><div class='k-v ser'>{int(r['serious_count'])}</div></div><div class='scard-stat'><div class='k-l'>✓ Moderate</div><div class='k-v mod'>{int(r['moderate_count'])}</div></div><div class='scard-stat'><div class='k-l'>Median PET</div><div class='k-v'>{r['median_pet_s']:.2f}s</div></div></div>
 </div>""", unsafe_allow_html=True)
 
 elif PAGE == "Events":
@@ -221,7 +194,7 @@ elif PAGE == "Events":
     df_show = df[['event_id','ped_id','veh_id','our_pet_s','severity','spark_status','human_review_status']].copy()
     df_show['our_pet_s'] = df_show['our_pet_s'].round(2)
     df_show = df_show.sort_values('our_pet_s')
-    st.markdown(f"<div style='color:#8690a6;font-size:.85rem;margin:.5rem 0 1rem 0;'>Showing {len(df_show)} of {len(events)} events</div>", unsafe_allow_html=True)
+    st.markdown(f"<div style='color:#8995a3;font-size:.85rem;margin:.5rem 0 1rem 0;'>Showing {len(df_show)} of {len(events)} events</div>", unsafe_allow_html=True)
     st.dataframe(df_show, use_container_width=True, hide_index=True, column_config={'our_pet_s': st.column_config.NumberColumn('PET (s)', format='%.2f')})
 
     if len(df):
@@ -295,7 +268,7 @@ elif PAGE == "Coverage":
         st.markdown(f"""<div class='scard'>
 <div class='scard-head'><span class='scard-name'>{pretty_session(r['scene'])}<span class='scene-id'>{r['scene']}</span></span><span class='scard-chip'>{dur_s}</span></div>
 <div class='scard-row'><div class='scard-stat'><div class='k-l'>Pedestrians tracked</div><div class='k-v'>{int(r['ped_count']) if pd.notna(r['ped_count']) else 'n/a'}</div></div><div class='scard-stat'><div class='k-l'>Vehicles tracked</div><div class='k-v'>{int(r['veh_count']) if pd.notna(r['veh_count']) else 'n/a'}</div></div><div class='scard-stat'><div class='k-l'>Candidate pairs</div><div class='k-v'>{int(r['candidate_pair_count']) if pd.notna(r['candidate_pair_count']) else 'n/a'}</div></div><div class='scard-stat'><div class='k-l'>Near-miss events</div><div class='k-v'>{int(r['event_count'])}</div></div></div>
-<div class='scard-row' style='margin-top:1rem;'><div class='scard-stat'><div class='k-l'>Critical</div><div class='k-v crit'>{int(r['critical_count'])}</div></div><div class='scard-stat'><div class='k-l'>Serious</div><div class='k-v ser'>{int(r['serious_count'])}</div></div><div class='scard-stat'><div class='k-l'>Moderate</div><div class='k-v mod'>{int(r['moderate_count'])}</div></div><div class='scard-stat'><div class='k-l'>Median PET</div><div class='k-v'>{r['median_pet_s']:.2f}s</div></div></div>
+<div class='scard-row' style='margin-top:1rem;'><div class='scard-stat'><div class='k-l'>⚠ Critical</div><div class='k-v crit'>{int(r['critical_count'])}</div></div><div class='scard-stat'><div class='k-l'>⚡ Serious</div><div class='k-v ser'>{int(r['serious_count'])}</div></div><div class='scard-stat'><div class='k-l'>✓ Moderate</div><div class='k-v mod'>{int(r['moderate_count'])}</div></div><div class='scard-stat'><div class='k-l'>Median PET</div><div class='k-v'>{r['median_pet_s']:.2f}s</div></div></div>
 </div>""", unsafe_allow_html=True)
 
 elif PAGE == "Reports":

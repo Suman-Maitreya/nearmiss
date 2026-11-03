@@ -69,7 +69,8 @@ def generate_report_html(scene, events_df, coverage_df):
         flags = ev['spark_flags'] or "[]"
         human_status = ev['human_review_status']
         sev = ev['severity']
-        sev_color = {'critical':'#ff4466','serious':'#ffa441','moderate':'#44dd99'}[sev]
+        sev_color = {'critical':'#ff6577','serious':'#ffb65c','moderate':'#55d6a0'}[sev]
+        sev_icon = {'critical':'⚠','serious':'⚡','moderate':'✓'}.get(sev, '•')
         status_label = ev['spark_status'].replace('_',' ')
         closest_m = f"{ev['closest_approach_m']:.2f} m" if pd.notna(ev['closest_approach_m']) else "n/a"
         t_conf = f"{ev['conflict_time_s']:.1f} s" if pd.notna(ev['conflict_time_s']) else "n/a"
@@ -80,7 +81,7 @@ def generate_report_html(scene, events_df, coverage_df):
       <div class="ev-num">EVENT {i:02d}</div>
       <div class="ev-id">Pedestrian {int(ev['ped_id'])} &nbsp;×&nbsp; Vehicle {int(ev['veh_id'])}</div>
     </div>
-    <div class="ev-sev" style="color:{sev_color};border-color:{sev_color}">{sev.upper()}</div>
+    <div class="ev-sev" style="color:{sev_color};border-color:{sev_color}">{sev_icon} &nbsp;{sev.upper()}</div>
   </div>
   <div class="ev-grid">
     <div class="ev-img"><img src="{img_data}" alt="Evidence frame at closest approach"></div>
@@ -123,7 +124,7 @@ def generate_report_html(scene, events_df, coverage_df):
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root{{--bg:#0a0e1a;--panel:#141928;--panel-2:#1b2137;--border:#253050;--text:#e8edf5;--muted:#8690a6;--brand:#5f8fff;--accent:#a855f7;--crit:#ff4466;--ser:#ffa441;--mod:#44dd99}}
+:root{{--bg:#0b0e12;--panel:#11161c;--panel-2:#171e26;--border:#252d37;--text:#edf1f5;--muted:#8995a3;--brand:#86a9ff;--accent:#b1c5ff;--crit:#ff6577;--ser:#ffb65c;--mod:#55d6a0}}
 *{{box-sizing:border-box;margin:0;padding:0}}
 body{{font-family:Inter,sans-serif;background:var(--bg);color:var(--text);line-height:1.55;padding:0}}
 .report{{max-width:860px;margin:0 auto;padding:3rem 2.5rem;background:var(--bg)}}
@@ -219,6 +220,33 @@ code{{font-family:'JetBrains Mono',monospace;background:var(--panel-2);color:#a8
   .report{{padding:1rem}}
   .ev-card,.summary,.kpi-row .k-card,.sev-bars,.recos,.method{{background:#fff;border-color:#ccc;color:#000}}
 }}
+
+/* NearMiss · Modern SaaS report system */
+*{{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+body{{background:var(--bg);line-height:1.58}}
+.report{{max-width:920px;padding:2.5rem 2.2rem}}
+.lh{{border-bottom:1px solid var(--border);padding-bottom:1.1rem;margin-bottom:1.6rem}}
+.lh::after{{background:var(--brand);width:72px;height:1px}}
+.lh-mark{{background:#1d2a42;border:1px solid #2d4267;border-radius:9px;color:var(--brand);box-shadow:none}}
+.lh-brand-text{{font-size:1.15rem;letter-spacing:-.4px}}
+.doc-title{{font-size:1.85rem;letter-spacing:-.7px}}
+.doc-meta{{font-size:.75rem;margin-bottom:1.7rem;color:var(--muted)}}
+.section{{margin-bottom:1.8rem}}
+.sec-tag{{font-size:.66rem;letter-spacing:.9px;color:var(--brand)}}
+.sec-h{{font-size:1.12rem;letter-spacing:-.25px;margin-bottom:.8rem}}
+.summary,.k-card,.sev-bars,.ev-card,.recos,.method{{background:var(--panel);border-color:var(--border);border-radius:10px;box-shadow:0 8px 22px rgba(0,0,0,.12)}}
+.summary{{border-left:2px solid var(--brand);padding:1rem 1.15rem}}
+.kpi-row{{gap:.65rem}}.k-card{{padding:.85rem}}
+.k-card::before{{width:2px;box-shadow:none!important}}
+.k-l{{font-size:.62rem;letter-spacing:.45px}}.k-v{{font-size:1.5rem;letter-spacing:-.5px}}
+.sev-track{{height:9px;background:#202832}}.sev-fill{{box-shadow:none!important}}
+.ev-card{{padding:1rem;margin-bottom:.8rem}}.ev-grid{{gap:1rem}}.ev-img img{{border-color:var(--border);border-radius:7px}}
+.ev-obs{{background:#151d27;border-left-width:2px;border-radius:0 7px 7px 0}}
+code{{background:#1a222c;color:var(--accent)}}
+.recos li{{margin-bottom:.7rem}}
+.foot{{border-color:var(--border)}}
+@media(max-width:700px){{.report{{padding:1.25rem 1rem}}.kpi-row{{grid-template-columns:repeat(2,1fr)}}.ev-grid{{grid-template-columns:1fr}}.lh{{align-items:flex-start;gap:1rem}}.lh-right{{max-width:45%;font-size:.68rem}}.doc-title{{font-size:1.5rem}}.sig{{gap:1rem}}}}
+@media print{{body,.report{{background:#fff!important;color:#111!important}}.summary,.k-card,.sev-bars,.ev-card,.recos,.method{{background:#fff!important;color:#111!important;box-shadow:none}}.lh,.foot{{border-color:#bbb}}.summary p,.m-v,.ev-obs{{color:#111}}}}
 </style>
 </head>
 <body>
@@ -266,9 +294,9 @@ code{{font-family:'JetBrains Mono',monospace;background:var(--panel-2);color:#a8
     <div class="sec-tag">03 · Severity Distribution</div>
     <div class="sec-h">By measurement band</div>
     <div class="sev-bars">
-      <div class="sev-bar"><div class="sev-label">Critical</div><div class="sev-track"><div class="sev-fill c" style="width:{crit_pct:.0f}%"></div></div><div class="sev-count c">{int(cov['critical_count'])}</div></div>
-      <div class="sev-bar"><div class="sev-label">Serious</div><div class="sev-track"><div class="sev-fill a" style="width:{ser_pct:.0f}%"></div></div><div class="sev-count a">{int(cov['serious_count'])}</div></div>
-      <div class="sev-bar"><div class="sev-label">Moderate</div><div class="sev-track"><div class="sev-fill g" style="width:{mod_pct:.0f}%"></div></div><div class="sev-count g">{int(cov['moderate_count'])}</div></div>
+      <div class="sev-bar"><div class="sev-label">⚠ Critical</div><div class="sev-track"><div class="sev-fill c" style="width:{crit_pct:.0f}%"></div></div><div class="sev-count c">{int(cov['critical_count'])}</div></div>
+      <div class="sev-bar"><div class="sev-label">⚡ Serious</div><div class="sev-track"><div class="sev-fill a" style="width:{ser_pct:.0f}%"></div></div><div class="sev-count a">{int(cov['serious_count'])}</div></div>
+      <div class="sev-bar"><div class="sev-label">✓ Moderate</div><div class="sev-track"><div class="sev-fill g" style="width:{mod_pct:.0f}%"></div></div><div class="sev-count g">{int(cov['moderate_count'])}</div></div>
     </div>
   </div>
 
