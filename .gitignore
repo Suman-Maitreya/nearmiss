@@ -50,3 +50,6 @@ extract_videos.py
 Thumbs.db
 *.swp
 *.swo
+
+# SAM 3.1 raw response dumps (development smoke tests)
+scripts/sam_*.txt
