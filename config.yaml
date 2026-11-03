@@ -1,0 +1,40 @@
+datasets:
+  tad_root: data/tad
+  fluid_root: data/fluid
+view_modes: [topdown, oblique, ego]
+fps_processed: 10
+chunk_seconds: 60
+chunk_overlap_seconds: 1
+sam:
+  max_objects_per_frame: 16
+  saturation_fraction: 0.01
+  prompts: [person, motorcycle, scooter, "auto rickshaw", car, bus, truck]
+  iou_duplicate_threshold: 0.7
+  iou_duplicate_min_frame_fraction: 0.5
+rider_association:
+  mask_overlap_threshold: 0.3
+  min_frame_fraction: 0.6
+teleport:
+  base_distance_m: 1.5
+  speed_multiplier: 1.5
+  v_max_mps: {pedestrian: 4, two_wheeler: 20, auto: 20, car: 20, bus: 15, truck: 15}
+calibration:
+  min_control_points: 6
+  min_holdout_points: 2
+  holdout_error_max_m: 0.5
+grid:
+  cell_size_m: 0.5
+  visit_gap_max_s: 0.5
+  track_gap_max_s: 0.5
+vehicle_min_speed_mps: 2.0
+pet:
+  candidate_max_s: 2.0
+  critical_max_s: 1.0
+  serious_max_s: 1.5
+  moderate_max_s: 2.0
+  sensitivity_check_s: [1.5, 2.0, 3.0]
+spark:
+  confidence_verify: 0.6
+  confidence_review_low: 0.4
+  consistency_sample_fraction: 0.1
+budget_usd_cap: 100
