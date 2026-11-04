@@ -53,3 +53,11 @@ Thumbs.db
 
 # SAM 3.1 raw response dumps (development smoke tests)
 scripts/sam_*.txt
+
+# Local deliverables / generated previews (not part of the product)
+Claude outputs/
+marketing/dashboard_real.html
+
+# Superseded drafts — build_event_locations3.py is the committed, final version
+scripts/build_event_locations.py
+scripts/build_event_locations2.py
