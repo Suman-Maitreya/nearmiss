@@ -6,6 +6,7 @@ answer is computed live from nearmiss.db. No fabricated statistics, no
 invented external benchmark, no hardcoded click-independent answers.
 """
 import json, os, sqlite3, math, re, glob, base64
+import html as html_mod
 from datetime import datetime
 import pandas as pd
 
@@ -64,6 +65,25 @@ def load_evidence_frames(raw_evidence_dir):
         m = re.search(r"(t[+-][\d.]+s)", os.path.basename(fp))
         out.append({"label": m.group(1) if m else os.path.basename(fp), "src": src})
     return out
+
+
+def load_critical_insight():
+    """Precomputed Muse Spark narrative synthesis across the critical events
+    (scripts/generate_critical_insight.py). All numbers in it were computed in
+    plain Python and handed to the model, not invented by it -- see that
+    script's docstring. Returns None if it hasn't been generated yet, so the
+    UI simply omits the card rather than showing anything made up."""
+    path = os.path.join(REPO_ROOT, "runs", "critical_insight.json")
+    if not os.path.isfile(path):
+        return None
+    try:
+        with open(path, encoding="utf-8") as f:
+            data = json.load(f)
+    except (OSError, json.JSONDecodeError):
+        return None
+    if not data.get("summary"):
+        return None
+    return data
 
 
 def wilson_ci(x, n, z=1.959963985):
@@ -155,6 +175,34 @@ def build_html(events, coverage):
             qa["confirmed"] = "No — Spark's visual review rejected this as a real near-miss (the actual closest approach was too far to be a genuine conflict)."
         else:
             qa["confirmed"] = "Not yet — this event hasn't had a Spark visual review. Its status is physics-only."
+
+        # "what can we do" — a grounded recommendation from this event's own real
+        # state (severity / spark_status / human_review_status / flags), not a
+        # live model call and not a generic template; it changes with the data.
+        flags_list = []
+        if row.get("spark_flags"):
+            try:
+                flags_list = json.loads(row["spark_flags"])
+            except (json.JSONDecodeError, TypeError):
+                flags_list = []
+        hrs = row["human_review_status"]
+        if st == "rejected":
+            qa["action"] = "No action needed — Spark's visual review rejected this as a real conflict, so this one shouldn't be used to justify an engineering or enforcement response."
+        elif hrs == "escalated":
+            qa["action"] = "Already escalated for a second pass — treat as unresolved. Don't act on this event's severity label until that review closes it out."
+        elif hrs == "pending" and row["needs_human_review"] == 1:
+            qa["action"] = "Flagged for human review and still pending — open it in the Review Queue and confirm, dismiss, or escalate before using it to justify any action."
+        elif hrs == "dismissed":
+            qa["action"] = "A reviewer already dismissed this one — no further action from it alone."
+        elif row["severity"] == "critical" and hrs == "confirmed":
+            base = f"Confirmed critical conflict at {pretty_session(row['scene'])} — worth flagging this crossing for an engineering look (sightlines, signal timing, or physical calming), since measured PET was {row['our_pet_s']:.2f}s."
+            if "spark_doubts_vehicle_overlay" in flags_list or "veh_visibility_marginal_at_4K" in flags_list:
+                base += " One caveat: Spark flagged the vehicle identification itself as uncertain at this altitude — worth a human glance at the evidence frames before citing it externally."
+            qa["action"] = base
+        elif row["severity"] == "critical":
+            qa["action"] = f"Critical by PET ({row['our_pet_s']:.2f}s) but not yet through human review — get a reviewer to confirm before using this one in a report or citing it to stakeholders."
+        else:
+            qa["action"] = f"Classified {row['severity']}, below the critical PET cutoff — no immediate action; useful mainly as denominator context for the overall conflict rate."
         return qa
 
 
@@ -244,6 +292,9 @@ def build_html(events, coverage):
     .radar-wrap { position:relative; width:100%; height:380px; background:radial-gradient(circle at 50% 50%,#111a2d 0%,#090e18 80%); border-radius:12px; border:1px solid rgba(255,255,255,.08); overflow:hidden; }
     canvas.radar-canvas { width:100%; height:100%; display:block; cursor:crosshair; }
     .radar-overlay { position:absolute; top:.8rem; left:.8rem; background:rgba(10,14,24,.85); backdrop-filter:blur(8px); padding:.3rem .6rem; border-radius:5px; font-family:'JetBrains Mono',monospace; font-size:.66rem; color:#94a3b8; border:1px solid rgba(255,255,255,.1); pointer-events:none; }
+    .radar-legend { position:absolute; top:.8rem; right:.8rem; background:rgba(10,14,24,.85); backdrop-filter:blur(8px); padding:.35rem .6rem; border-radius:5px; font-size:.66rem; color:#cbd5e1; border:1px solid rgba(255,255,255,.1); pointer-events:none; display:flex; gap:.6rem; }
+    .radar-legend span { display:inline-flex; align-items:center; gap:.3rem; }
+    .radar-legend i { width:7px; height:7px; border-radius:50%; display:inline-block; }
     .radar-tooltip { position:absolute; display:none; background:rgba(13,17,28,.96); border:1px solid rgba(59,130,246,.5); border-radius:8px; padding:.5rem .7rem; font-family:'JetBrains Mono',monospace; font-size:.7rem; color:#fff; pointer-events:none; z-index:50; max-width:260px; }
     .tab-pane { display:none; } .tab-pane.active { display:block; }
     .btn-action { background:rgba(255,255,255,.06); border:1px solid var(--border); color:#e2e8f0; padding:.32rem .75rem; border-radius:6px; font-size:.74rem; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:.4rem; }
@@ -317,6 +368,24 @@ def build_html(events, coverage):
     </div>
     """
 
+    insight = load_critical_insight()
+    insight_block = ""
+    if insight:
+        safe_summary = html_mod.escape(insight.get("summary", ""))
+        pattern_items = "".join(
+            f"<li style='margin-bottom:.3rem;'>{html_mod.escape(p)}</li>" for p in insight.get("patterns", [])
+        )
+        insight_block = f"""
+      <div class="bento-row">
+        <div class="card" style="border-color:rgba(168,85,247,.3);">
+          <div class="card-header"><div><div class="card-title" style="color:#d8b4fe;">AI pattern insight &mdash; Muse Spark</div><div class="card-subtitle">Synthesized from the {insight.get("n_events", crit)} critical events above &middot; every number in it was computed in plain Python first and handed to the model, not invented by it</div></div></div>
+          <div class="ai-response-box" style="display:block;">
+            <div>{safe_summary}</div>
+            <ul style="margin:.6rem 0 0 1.1rem;padding:0;">{pattern_items}</ul>
+          </div>
+        </div>
+      </div>"""
+
     COCKPIT = f"""
     <div id="mission-cmd" class="tab-pane active">
       <div class="bento-row bento-4">
@@ -325,10 +394,11 @@ def build_html(events, coverage):
         <div class="card kpi-card amber"><div class="kpi-label"><span>Conflict rate</span><span class="mono" style="font-size:.62rem;color:var(--ser);">95% WILSON</span></div><div class="kpi-val amber">{rate_all:.1f}</div><div class="kpi-desc">per 1,000 candidate ped-vehicle pairs · CI [{lo_all:.1f}&ndash;{hi_all:.1f}]</div></div>
         <div class="card kpi-card purple"><div class="kpi-label"><span>Spark confirmation rate</span><span class="mono" style="font-size:.62rem;color:#c084fc;">{reviewed_n} REVIEWED</span></div><div class="kpi-val purple">{pass_rate:.0f}%</div><div class="kpi-desc">{confirmed_n} of {reviewed_n} visually reviewed events confirmed · {rejected_n} rejected as false positive</div></div>
       </div>
+      {insight_block}
       <div class="bento-row bento-2-1">
         <div class="card">
-          <div class="card-header"><div><div class="card-title">Conflict locations (real, measured)</div><div class="card-subtitle">Plotted from FLUID trajectory positions at each event's actual closest-approach frame</div></div><button class="btn-action" onclick="switchMission('radar')">Expand &rarr;</button></div>
-          <div class="radar-wrap"><canvas id="miniRadarCanvas" class="radar-canvas"></canvas><div class="radar-overlay">METERS, RELATIVE TO FRAME CENTER</div><div id="miniRadarTooltip" class="radar-tooltip"></div></div>
+          <div class="card-header"><div><div class="card-title">Conflict locations (real, measured)</div><div class="card-subtitle">Plotted from FLUID trajectory positions at each event's actual closest-approach frame &middot; crossing backdrop is stylized for orientation, not a site survey</div></div><button class="btn-action" onclick="switchMission('radar')">Expand &rarr;</button></div>
+          <div class="radar-wrap"><canvas id="miniRadarCanvas" class="radar-canvas"></canvas><div class="radar-overlay">METERS, RELATIVE TO FRAME CENTER</div><div class="radar-legend"><span><i style="background:#f43f5e;"></i>Critical</span><span><i style="background:#f59e0b;"></i>Serious</span><span><i style="background:#10b981;"></i>Moderate</span></div><div id="miniRadarTooltip" class="radar-tooltip"></div></div>
         </div>
         <div class="card">
           <div class="card-header"><div><div class="card-title">Severity distribution</div><div class="card-subtitle">Post-Encroachment Time threshold breakdown</div></div></div>
@@ -385,7 +455,7 @@ def build_html(events, coverage):
           <div><div class="card-title">Full conflict location map (click any point to inspect)</div><div class="card-subtitle">Real-world coordinates in meters, derived from FLUID trajectory data at each event's closest-approach frame — not a drawn schematic</div></div>
           <div style="display:flex;gap:.5rem;"><button class="btn-action primary" onclick="filterRadar('all')">All</button><button class="btn-action crit" onclick="filterRadar('critical')">Critical only</button></div>
         </div>
-        <div class="radar-wrap" style="height:540px;"><canvas id="fullRadarCanvas" class="radar-canvas"></canvas><div class="radar-overlay" id="radarLegend">METERS, RELATIVE TO FRAME CENTER &middot; CLICK TO INSPECT</div><div id="fullRadarTooltip" class="radar-tooltip"></div></div>
+        <div class="radar-wrap" style="height:540px;"><canvas id="fullRadarCanvas" class="radar-canvas"></canvas><div class="radar-overlay" id="radarLegend">METERS, RELATIVE TO FRAME CENTER &middot; CLICK TO INSPECT</div><div class="radar-legend"><span><i style="background:#f43f5e;"></i>Critical</span><span><i style="background:#f59e0b;"></i>Serious</span><span><i style="background:#10b981;"></i>Moderate</span></div><div id="fullRadarTooltip" class="radar-tooltip"></div></div>
         <div id="radarDetail" class="detail-drawer"></div>
       </div>
     </div>
@@ -489,6 +559,31 @@ def build_html(events, coverage):
       const sx = v => pad + (v-minX)/(maxX-minX||1) * (w-2*pad);
       const sy = v => h - (pad + (v-minY)/(maxY-minY||1) * (h-2*pad));
 
+      // --- decorative intersection backdrop (orientation only — NOT a
+      // surveyed road layout; the only real, measured thing on this canvas
+      // is the dot positions below, from loc_x_m/loc_y_m) ---
+      const plotCx = pad + (w-2*pad)/2, plotCy = pad + (h-2*pad)/2;
+      const roadHalf = Math.min(w,h) * 0.1;
+      ctx.fillStyle = 'rgba(255,255,255,.05)';
+      ctx.fillRect(pad, plotCy-roadHalf, w-2*pad, roadHalf*2);
+      ctx.fillRect(plotCx-roadHalf, pad, roadHalf*2, h-2*pad);
+      ctx.strokeStyle = 'rgba(255,255,255,.14)';
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([10,10]);
+      ctx.beginPath(); ctx.moveTo(pad,plotCy); ctx.lineTo(w-pad,plotCy); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(plotCx,pad); ctx.lineTo(plotCx,h-pad); ctx.stroke();
+      ctx.setLineDash([]);
+      function drawZebra(cx0,cy0,horiz) {{
+        ctx.fillStyle = 'rgba(255,255,255,.1)';
+        const stripeW = roadHalf*2*0.72, stripeStep = Math.max(6, roadHalf*0.3);
+        if (horiz) {{ for (let i=-stripeW/2;i<stripeW/2;i+=stripeStep*2) ctx.fillRect(cx0+i, cy0-roadHalf*0.85, stripeStep, roadHalf*1.7); }}
+        else {{ for (let i=-stripeW/2;i<stripeW/2;i+=stripeStep*2) ctx.fillRect(cx0-roadHalf*0.85, cy0+i, roadHalf*1.7, stripeStep); }}
+      }}
+      drawZebra(plotCx, pad+roadHalf*1.4, true);
+      drawZebra(plotCx, h-pad-roadHalf*1.4, true);
+      drawZebra(pad+roadHalf*1.4, plotCy, false);
+      drawZebra(w-pad-roadHalf*1.4, plotCy, false);
+
       // faint grid
       ctx.strokeStyle = 'rgba(255,255,255,.04)';
       for (let i=0;i<=8;i++) {{
@@ -575,6 +670,7 @@ def build_html(events, coverage):
               <div class="ask-chip" onclick="showQA('${{e.event_id}}','why')">Why this severity?</div>
               <div class="ask-chip" onclick="showQA('${{e.event_id}}','spark')">What did Spark say?</div>
               <div class="ask-chip" onclick="showQA('${{e.event_id}}','confirmed')">Is this confirmed?</div>
+              <div class="ask-chip" onclick="showQA('${{e.event_id}}','action')">What can we do?</div>
             </div>
             <div class="ai-response-box" id="qa-${{e.event_id}}"></div>
           </div>
