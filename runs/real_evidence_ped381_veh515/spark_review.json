@@ -1,0 +1,16 @@
+{
+  "event": {
+    "scene": "20250526_video_Traj",
+    "ped_id": 381,
+    "veh_id": 515,
+    "our_pet_s": 0.0,
+    "render_mode": "real_video_frames"
+  },
+  "spark_response": {
+    "pedestrian_overlay_on_real_pedestrian": "no",
+    "vehicle_overlay_on_real_vehicle": "yes",
+    "paths_close": "yes",
+    "closest_frame": 2,
+    "observation": "V515 aligns in later frames with a small white scooter moving east from the sidewalk onto the crosswalk, while P381 sits over empty pavement/crosswalk with no distinct pedestrian visible. The two overlays pass within about a vehicle's length on the sidewalk corner around t=-1.0s."
+  }
+}

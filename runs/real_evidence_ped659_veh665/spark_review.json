@@ -1,0 +1,17 @@
+{
+  "event": {
+    "scene": "20250120_video_Traj",
+    "ped_id": 659,
+    "veh_id": 665,
+    "our_pet_s": 0.0,
+    "render_mode": "real_video_frames_v2",
+    "pix_per_m": 24.75
+  },
+  "spark_response": {
+    "pedestrian_overlay_on_real_pedestrian": "no",
+    "vehicle_overlay_on_real_vehicle": "no",
+    "paths_close": "yes",
+    "closest_frame": 3,
+    "observation": "P659 stays stationary on empty pavement with no visible person underneath. V665 moves along the turning lane ahead of the black SUV but its box covers empty road, coinciding with P659 at t=0.0s near the crosswalk."
+  }
+}

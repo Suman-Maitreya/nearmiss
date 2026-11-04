@@ -1,0 +1,16 @@
+{
+  "event": {
+    "scene": "20250526_video_Traj",
+    "ped_id": 1756,
+    "veh_id": 1757,
+    "our_pet_s": 0.0,
+    "render_mode": "real_video_frames"
+  },
+  "spark_response": {
+    "pedestrian_overlay_on_real_pedestrian": "yes",
+    "vehicle_overlay_on_real_vehicle": "yes",
+    "paths_close": "yes",
+    "closest_frame": 3,
+    "observation": "A southbound scooter tracked as V1757 and a slower southbound pedestrian tracked as P1756 converge on the central crosswalk, overlap at t=0.0s, then the scooter continues south ahead of the pedestrian."
+  }
+}

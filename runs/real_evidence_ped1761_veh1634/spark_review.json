@@ -1,0 +1,16 @@
+{
+  "event": {
+    "scene": "20250526_video_Traj",
+    "ped_id": 1761,
+    "veh_id": 1634,
+    "our_pet_s": 0.0,
+    "render_mode": "real_video_frames"
+  },
+  "spark_response": {
+    "pedestrian_overlay_on_real_pedestrian": "no",
+    "vehicle_overlay_on_real_vehicle": "yes",
+    "paths_close": "yes",
+    "closest_frame": 3,
+    "observation": "The P-labeled target moves fast along the roadway like a two-wheeler rider, not a pedestrian on foot. It converges with the V-labeled white scooter near the center lane line around t=0.0s where labels overlap."
+  }
+}

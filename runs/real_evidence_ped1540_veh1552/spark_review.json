@@ -1,0 +1,16 @@
+{
+  "event": {
+    "scene": "20250526_video_Traj",
+    "ped_id": 1540,
+    "veh_id": 1552,
+    "our_pet_s": 0.0,
+    "render_mode": "real_video_frames"
+  },
+  "spark_response": {
+    "pedestrian_overlay_on_real_pedestrian": "no",
+    "vehicle_overlay_on_real_vehicle": "yes",
+    "paths_close": "yes",
+    "closest_frame": 3,
+    "observation": "The green P label stays near the sidewalk curb while a small dark pedestrian figure is visible moving down the crosswalk. The orange V box follows a black sedan turning through the crosswalk area and overlaps the P position at t=0.0s."
+  }
+}

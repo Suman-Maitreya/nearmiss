@@ -1,0 +1,19 @@
+{
+  "scene": "20250526_video_Traj",
+  "ped_id": 3207,
+  "veh_id": 3167,
+  "conflict_time_s": 1592.9,
+  "closest_approach_m": 3.4221192264443383,
+  "our_pet_s": 0.0,
+  "severity": "critical",
+  "render_mode": "real_video_frames",
+  "frame_offsets_s": [
+    -3.0,
+    -2.0,
+    -1.0,
+    0.0,
+    1.0,
+    2.0,
+    3.0
+  ]
+}

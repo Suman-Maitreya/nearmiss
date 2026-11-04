@@ -1,0 +1,16 @@
+{
+  "event": {
+    "scene": "20250526_video_Traj",
+    "ped_id": 2201,
+    "veh_id": 2189,
+    "our_pet_s": 0.0,
+    "render_mode": "real_video_frames"
+  },
+  "spark_response": {
+    "pedestrian_overlay_on_real_pedestrian": "no",
+    "vehicle_overlay_on_real_vehicle": "yes",
+    "paths_close": "yes",
+    "closest_frame": 3,
+    "observation": "The green car travels southwest past the triangular island tip where the P marker remains stationary, overlapping at t=0.0s. No distinct pedestrian is visible under the P circle and the V box drifts behind the car in later frames."
+  }
+}

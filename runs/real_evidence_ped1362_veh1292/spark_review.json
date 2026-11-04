@@ -1,0 +1,16 @@
+{
+  "event": {
+    "scene": "20250526_video_Traj",
+    "ped_id": 1362,
+    "veh_id": 1292,
+    "our_pet_s": 0.0,
+    "render_mode": "real_video_frames"
+  },
+  "spark_response": {
+    "pedestrian_overlay_on_real_pedestrian": "no",
+    "vehicle_overlay_on_real_vehicle": "no",
+    "paths_close": "yes",
+    "closest_frame": 3,
+    "observation": "V1292 box stays stationary straddling grass and a queued white car, while P1362 appears over empty asphalt and moves away. No clear pedestrian or moving vehicle is visible under the overlays, but the plotted marks are closest at t=+0.0s."
+  }
+}

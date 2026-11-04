@@ -1,0 +1,16 @@
+{
+  "event": {
+    "scene": "20250526_video_Traj",
+    "ped_id": 768,
+    "veh_id": 539,
+    "our_pet_s": 0.0,
+    "render_mode": "real_video_frames"
+  },
+  "spark_response": {
+    "pedestrian_overlay_on_real_pedestrian": "unsure",
+    "vehicle_overlay_on_real_vehicle": "yes",
+    "paths_close": "yes",
+    "closest_frame": 3,
+    "observation": "The V539 box clearly tracks a small blue vehicle moving west across the crosswalk while P768 moves east, overlapping at t=+0.0s. The P768 location is only a few pixels on white stripes and a distinct pedestrian is hard to resolve."
+  }
+}

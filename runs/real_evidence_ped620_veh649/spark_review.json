@@ -1,0 +1,16 @@
+{
+  "event": {
+    "scene": "20250525_video_Traj",
+    "ped_id": 620,
+    "veh_id": 649,
+    "our_pet_s": 0.0,
+    "render_mode": "real_video_frames"
+  },
+  "spark_response": {
+    "pedestrian_overlay_on_real_pedestrian": "no",
+    "vehicle_overlay_on_real_vehicle": "no",
+    "paths_close": "yes",
+    "closest_frame": 3,
+    "observation": "Both the P620 circle and V649 rectangle sit on empty road surface with no visible pedestrian or vehicle underneath. The two overlays converge and overlap at t=+0.0s before V649 drifts left off the roadway."
+  }
+}

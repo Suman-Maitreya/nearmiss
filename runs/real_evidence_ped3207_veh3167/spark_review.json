@@ -1,0 +1,16 @@
+{
+  "event": {
+    "scene": "20250526_video_Traj",
+    "ped_id": 3207,
+    "veh_id": 3167,
+    "our_pet_s": 0.0,
+    "render_mode": "real_video_frames"
+  },
+  "spark_response": {
+    "pedestrian_overlay_on_real_pedestrian": "no",
+    "vehicle_overlay_on_real_vehicle": "no",
+    "paths_close": "yes",
+    "closest_frame": 3,
+    "observation": "The green P circle moves southeast over empty asphalt beside a stopped green car while the orange V box stays fixed on an empty lane with no vehicle inside it."
+  }
+}

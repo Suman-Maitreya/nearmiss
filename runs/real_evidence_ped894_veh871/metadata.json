@@ -1,0 +1,26 @@
+{
+  "scene": "20250526_video_Traj",
+  "ped_id": 894,
+  "veh_id": 871,
+  "conflict_time_s": 375.6,
+  "closest_approach_m": 1.3729530217745956,
+  "our_pet_s": 0.0,
+  "severity": "critical",
+  "crop_center_world_m": [
+    21.0,
+    2.0
+  ],
+  "crop_half_m": 25.0,
+  "pix_per_m": 24.75,
+  "frame_offsets_s": [
+    -3.0,
+    -2.0,
+    -1.0,
+    0.0,
+    1.0,
+    2.0,
+    3.0
+  ],
+  "source_video": "D:\\META\\nearmiss\\data\\fluid\\videos\\20250526_video.mp4",
+  "render_mode": "real_video_frames"
+}

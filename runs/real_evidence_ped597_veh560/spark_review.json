@@ -1,0 +1,16 @@
+{
+  "event": {
+    "scene": "20250526_video_Traj",
+    "ped_id": 597,
+    "veh_id": 560,
+    "our_pet_s": 0.0,
+    "render_mode": "real_video_frames"
+  },
+  "spark_response": {
+    "pedestrian_overlay_on_real_pedestrian": "no",
+    "vehicle_overlay_on_real_vehicle": "yes",
+    "paths_close": "yes",
+    "closest_frame": 3,
+    "observation": "P597 does not sit on a pedestrian on foot but follows a northbound scooter/motorcycle rider through the intersection, while V560 correctly tracks a white bus moving north. The two come closest in adjacent lanes around t=0.0s."
+  }
+}

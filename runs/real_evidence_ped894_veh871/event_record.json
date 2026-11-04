@@ -1,0 +1,35 @@
+{
+  "event_id": "20250526_video_Traj_ped894_veh871",
+  "scene": "20250526_video_Traj",
+  "ped_id": 894,
+  "veh_id": 871,
+  "conflict_time_s": 375.6,
+  "closest_approach_m": 1.3729530217745956,
+  "our_pet_s": 0.0,
+  "severity": "critical",
+  "render_mode": "real_video_frames",
+  "spark_review": {
+    "pedestrian_overlay_on_real_pedestrian": "unsure",
+    "vehicle_overlay_on_real_vehicle": "yes",
+    "paths_close": "yes",
+    "closest_frame": 3,
+    "observation": "P894 moves south along the crosswalk edge while V871 moves north, and the two markers overlap at t=0.0s. V871 appears to track a small scooter/motorcycle, while the pedestrian is only a few pixels and hard to confirm except in later frames."
+  },
+  "closest_frame_matches_physics": true,
+  "status": "supported_with_flag",
+  "status_reason": "Vehicle track confirmed, paths close confirmed; flags: ped_visibility_marginal_at_4K",
+  "flags": [
+    "ped_visibility_marginal_at_4K"
+  ],
+  "needs_human_review": true,
+  "evidence_dir": "D:\\META\\nearmiss\\runs\\real_evidence_ped894_veh871",
+  "evidence_frames": [
+    "frame_00_t-3.0s.jpg",
+    "frame_01_t-2.0s.jpg",
+    "frame_02_t-1.0s.jpg",
+    "frame_03_t+0.0s.jpg",
+    "frame_04_t+1.0s.jpg",
+    "frame_05_t+2.0s.jpg",
+    "frame_06_t+3.0s.jpg"
+  ]
+}

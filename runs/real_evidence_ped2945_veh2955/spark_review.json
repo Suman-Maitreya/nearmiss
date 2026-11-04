@@ -1,0 +1,16 @@
+{
+  "event": {
+    "scene": "20250526_video_Traj",
+    "ped_id": 2945,
+    "veh_id": 2955,
+    "our_pet_s": 0.0,
+    "render_mode": "real_video_frames"
+  },
+  "spark_response": {
+    "pedestrian_overlay_on_real_pedestrian": "no",
+    "vehicle_overlay_on_real_vehicle": "no",
+    "paths_close": "yes",
+    "closest_frame": 3,
+    "observation": "The green and orange markers overlap at t=0.0 then separate as a white car moves south to the curb. No pedestrian is visible under the green circle, and the orange box stays offset west of the white car."
+  }
+}
