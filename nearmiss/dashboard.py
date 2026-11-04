@@ -99,6 +99,52 @@ def write_review(event_id, status, note):
     con.execute("UPDATE events SET human_review_status=?, human_review_note=?, updated_at=datetime('now') WHERE event_id=?", (status, note, event_id))
     con.commit(); con.close(); st.cache_data.clear()
 
+def normalize_wav_for_asr(raw_wav_bytes, target_rate=16000):
+    """The ASR endpoint requires mono, 16-bit integer PCM at 16kHz or 24kHz
+    (RIFF/WAVE container) -- st.audio_input records at whatever rate/channel
+    count the browser gives (often 48kHz stereo), which would otherwise fail
+    silently or get rejected. Downmix to mono, resample to 16kHz, and
+    re-encode as 16-bit PCM before sending."""
+    import io, wave
+    import numpy as np
+
+    with wave.open(io.BytesIO(raw_wav_bytes), "rb") as wf:
+        n_channels = wf.getnchannels()
+        sampwidth = wf.getsampwidth()
+        framerate = wf.getframerate()
+        n_frames = wf.getnframes()
+        raw = wf.readframes(n_frames)
+
+    dtype = {1: np.uint8, 2: np.int16, 4: np.int32}.get(sampwidth, np.int16)
+    audio = np.frombuffer(raw, dtype=dtype).astype(np.float32)
+    if sampwidth == 1:
+        audio = audio - 128.0  # uint8 PCM is unsigned, centre it
+    if n_channels > 1:
+        audio = audio.reshape(-1, n_channels).mean(axis=1)
+
+    if framerate != target_rate and len(audio) > 1:
+        try:
+            from scipy.signal import resample
+            audio = resample(audio, int(len(audio) * target_rate / framerate))
+        except ImportError:
+            # crude fallback: linear-interpolate if scipy isn't available
+            old_idx = np.linspace(0, len(audio) - 1, num=len(audio))
+            new_len = max(1, int(len(audio) * target_rate / framerate))
+            new_idx = np.linspace(0, len(audio) - 1, num=new_len)
+            audio = np.interp(new_idx, old_idx, audio)
+
+    peak = np.max(np.abs(audio)) or 1.0
+    scale = 32767.0 / peak if peak > 32767.0 else 1.0
+    audio_16 = np.clip(audio * scale, -32768, 32767).astype(np.int16)
+
+    out = io.BytesIO()
+    with wave.open(out, "wb") as wf_out:
+        wf_out.setnchannels(1)
+        wf_out.setsampwidth(2)
+        wf_out.setframerate(target_rate)
+        wf_out.writeframes(audio_16.tobytes())
+    return out.getvalue()
+
 def safe_str(v):
     if v is None or (isinstance(v, float) and pd.isna(v)): return None
     return str(v)
@@ -399,7 +445,42 @@ elif PAGE == "Review Queue":
             cols = st.columns(len(frames))
             for c,f in zip(cols, frames): c.image(os.path.join(ev_dir, f), caption=f.split('_')[-1].replace('.jpg',''), use_container_width=True)
         st.markdown("<div class='sec-h'>Analyst decision</div>", unsafe_allow_html=True)
-        note = st.text_area("Note (optional)", key=f"note_{pick}", label_visibility="collapsed", placeholder="Optional analyst note...")
+        voice_col, _ = st.columns([2, 3])
+        with voice_col:
+            if hasattr(st, "audio_input"):
+                voice_clip = st.audio_input("Or record a voice note", key=f"voice_{pick}")
+            else:
+                st.caption("Voice notes need a newer Streamlit (`pip install -U streamlit`) — using file upload instead.")
+                voice_clip = st.file_uploader("Or upload a voice note (wav/mp3)", type=["wav", "mp3", "m4a"], key=f"voice_{pick}")
+            if voice_clip is not None:
+                if st.button("🎙️ Transcribe to note", key=f"transcribe_{pick}", use_container_width=True):
+                    try:
+                        import requests as _requests
+                        key = os.environ["MODEL_API_KEY"]
+                        audio_bytes = normalize_wav_for_asr(voice_clip.getvalue())
+                        req_part = json.dumps({
+                            "mode": "DIARIZATION",
+                            "model": "muse-voice-transcribe-1.0",
+                            "audioEncoding": "WAV",
+                        })
+                        r = _requests.post(
+                            "https://api.meta.ai/v1/asr/transcribe",
+                            headers={"Authorization": f"Bearer {key}"},
+                            files={
+                                "audio": ("voice_note.wav", audio_bytes, "audio/wav"),
+                                "request": (None, req_part, "application/json"),
+                            },
+                            timeout=30,
+                        )
+                        r.raise_for_status()
+                        transcript = r.json().get("transcript", "").strip()
+                        st.session_state[f"note_{pick}"] = transcript or "(transcription returned no text)"
+                        st.rerun()
+                    except KeyError:
+                        st.error("MODEL_API_KEY isn't set in this shell — voice transcription needs it (same key used for Spark review).")
+                    except Exception as e:
+                        st.error(f"Transcription failed: {e}")
+        note = st.text_area("Note (optional)", key=f"note_{pick}", label_visibility="collapsed", placeholder="Optional analyst note — type, or record a voice note above and transcribe it in.")
         b1,b2,b3,b4 = st.columns(4)
         if b1.button("✅ Confirm", key=f"ok_{pick}", use_container_width=True): write_review(pick, 'confirmed', note or 'confirmed by analyst'); st.rerun()
         if b2.button("❌ Dismiss", key=f"dis_{pick}", use_container_width=True): write_review(pick, 'dismissed', note or 'dismissed by analyst'); st.rerun()
