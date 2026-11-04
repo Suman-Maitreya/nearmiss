@@ -1,0 +1,37 @@
+{
+  "generated_at": "2026-11-04T08:33:54.558858",
+  "model": "muse-spark-1.3",
+  "scope": "critical_events",
+  "n_events": 22,
+  "stats": {
+    "n_critical_events": 22,
+    "pet_median_s": 0.0,
+    "pet_min_s": 0.0,
+    "pet_max_s": 1.0,
+    "vehicle_type_counts": {
+      "car": 22
+    },
+    "spark_status_counts": {
+      "supported_with_flag": 18,
+      "supported": 3,
+      "rejected": 1
+    },
+    "human_review_status_counts": {
+      "dismissed": 1,
+      "pending": 16,
+      "confirmed": 4,
+      "escalated": 1
+    },
+    "common_flag_themes": {
+      "spark_doubts_vehicle_overlay": 7,
+      "ped_visibility_marginal_at_4K": 4
+    }
+  },
+  "summary": "All 22 critical events involve car as the vehicle type with PET spanning from 0.0 to 1.0 and a median of 0.0 in the precomputed stats. Spark marked 18 as supported_with_flag with 3 as supported and 1 as rejected, while human review shows 16 pending with 4 confirmed and 1 dismissed and 1 escalated. Common flag themes include spark_doubts_vehicle_overlay in 7 and ped_visibility_marginal_at_4K in 4, reflecting overlays on empty road surface and pedestrian figures described as only a few pixels and hard to resolve. Flagged cases often involve scooter or motorcycle riders tracked as pedestrians converging with cars or buses in adjacent lanes near crosswalks.",
+  "patterns": [
+    "Empty-overlay convergence: 20250525_video_Traj_ped620_veh649 shows both the P circle and V rectangle sitting on empty road surface with no visible pedestrian or vehicle underneath while converging and overlapping.",
+    "Two-wheeler mislabeled as pedestrian: 20250526_video_Traj_ped597_veh560 shows P following a northbound scooter rider through the intersection while V tracks a white bus moving north with closest approach in adjacent lanes.",
+    "Marginal pedestrian visibility: pedestrian figures described as only a few pixels and hard to resolve underlies the theme counted in 4 with example 20250526_video_Traj_ped768_veh539 where the box tracks a small blue vehicle moving west while P moves east and overlaps."
+  ],
+  "suspicious_numbers_not_in_source_data": []
+}

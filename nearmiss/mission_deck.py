@@ -261,6 +261,8 @@ def build_html(events, coverage):
     .brand-icon { width:28px; height:28px; background:var(--brand-gradient); border-radius:6px; display:flex; align-items:center; justify-content:center; color:#fff; }
     .brand-title { font-weight:800; font-size:1.05rem; letter-spacing:-.4px; background:linear-gradient(90deg,#fff 0%,#cbdcf8 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
     .brand-site-pill { display:inline-flex; align-items:center; gap:.35rem; background:rgba(255,255,255,.05); border:1px solid var(--border); padding:.12rem .45rem; border-radius:999px; font-size:.65rem; color:var(--text-muted); }
+    .brand-pill-row { display:flex; align-items:center; gap:.4rem; margin-top:.15rem; }
+    .powered-by-pill { display:inline-flex; align-items:center; gap:.35rem; background:linear-gradient(90deg,rgba(59,130,246,.14),rgba(168,85,247,.14)); border:1px solid rgba(168,85,247,.3); padding:.12rem .5rem; border-radius:999px; font-size:.65rem; color:#d8b4fe; font-weight:600; }
     .dot-live { width:6px; height:6px; background:var(--mod); border-radius:50%; box-shadow:0 0 6px var(--mod); animation:pulse 2s infinite; }
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.55} }
     .mission-dock { display:flex; background:rgba(14,20,32,.92); padding:2px; border-radius:8px; border:1px solid var(--border); gap:2px; }
@@ -337,7 +339,7 @@ def build_html(events, coverage):
     <header class="cmd-header">
       <div class="brand-wrap">
         <div class="brand-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
-        <div><div class="brand-title">NearMiss</div><div class="brand-site-pill"><span class="dot-live"></span> Jurong Lake · real pilot data</div></div>
+        <div><div class="brand-title">NearMiss</div><div class="brand-pill-row"><div class="brand-site-pill"><span class="dot-live"></span> Jurong Lake · real pilot data</div><div class="powered-by-pill">&#9889; SAM 3.1 + Muse Spark 1.3</div></div></div>
       </div>
       <nav class="mission-dock">
         <div class="mission-tab active" onclick="switchMission('cmd')"><span>Cockpit</span><span class="tab-badge">{tot}</span></div>
