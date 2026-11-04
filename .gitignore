@@ -12,8 +12,8 @@ cache/
 # frames the Mission Deck UI loads (nearmiss/mission_deck.py), which must
 # ship with the repo or a fresh clone shows no Spark images at all.
 runs/*
-!runs/real_evidence_*
-!runs/real_evidence_*/*
+!runs/real_evidence_*/
+!runs/real_evidence_*/**
 
 # Secrets / env
 .env
