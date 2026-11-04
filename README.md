@@ -8,6 +8,8 @@
 ![Python 3.11](https://img.shields.io/badge/Python-3.11-3776ab?style=flat-square)
 ![License: MIT](https://img.shields.io/badge/License-MIT-44dd99?style=flat-square)
 
+![NearMiss Mission Deck — Cockpit view, real pilot data](docs/hero_banner.png)
+
 NearMiss is a pedestrian-vehicle near-miss detection system for city traffic safety engineers. It turns any traffic camera into a continuous near-miss auditor: it detects every moment a pedestrian and vehicle come dangerously close, measures how close in metres and seconds, visually reviews each event with Meta's Muse Spark against the raw video, routes ambiguous cases to a human analyst, and produces authority-ready safety reports.
 
 ---
@@ -43,6 +45,8 @@ Across all 22: 3 `supported`, 18 `supported_with_flag`, 1 `rejected` as a false 
 ---
 
 ## 🏗 How it works
+
+![NearMiss pipeline architecture](docs/architecture.svg)
 
 Four stages, one evidence-grounded pipeline:
 
